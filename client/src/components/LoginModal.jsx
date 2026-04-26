@@ -1,12 +1,25 @@
 import React from 'react'
-import { AnimatePresence, motion } from "framer-motion" // ✅ FIXED
+import { AnimatePresence, motion } from "framer-motion" 
+import { signInWithPopup } from 'firebase/auth'
+import { auth, provider } from '../firebase'
+import axios from "axios"
 
 function LoginModal({ open, onClose }) {
 
    
-    const handleGoogleAuth = () => {
-        console.log("Fake login success")
-        onClose()
+    const handleGoogleAuth=async ()=>{
+        try {
+            const result=await signInWithPopup(auth,provider)
+            const {data}=await axios.post(`${serverUrl}/api/auth/google`,{
+                name:result.user.displayName,
+                email:result.user.email,
+                avatar:result.user.photoURL
+            },{withCredentials:true})
+            dispatch(setUserData(data))
+            onClose()
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     return (
