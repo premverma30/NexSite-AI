@@ -53,7 +53,7 @@ function LoginModal({ open, onClose }) {
                             <div className='px-8 pt-14 pb-10 text-center'>
 
                                 <h2 className='text-2xl mb-6'>
-                                    Welcome to <span className='text-purple-400'>GenWeb.ai</span>
+                                    Welcome to <span className='text-purple-400'>NexSite.ai</span>
                                 </h2>
 
                                 <motion.button

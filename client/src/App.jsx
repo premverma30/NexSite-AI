@@ -2,7 +2,7 @@ import React from 'react'
 import {BrowserRouter, Route, Routes} from "react-router-dom"
 import Home from './pages/Home'
 import useGetCurrentUser from './hooks/useGetCurrentUser'
-export const serverURL="http://localhost:8000"
+export const serverUrl="http://localhost:8000"
 
 
 function App() {
