@@ -3,8 +3,14 @@ import { AnimatePresence, motion } from "framer-motion"
 import { signInWithPopup } from 'firebase/auth'
 import { auth, provider } from '../firebase'
 import axios from "axios"
+import { serverUrl } from '../App'
+import { useDispatch } from 'react-redux'
+import { setUserData } from '../redux/userSlice'
+import { useNavigate } from 'react-router-dom'
 
 function LoginModal({ open, onClose }) {
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
 
    
     const handleGoogleAuth=async ()=>{
@@ -17,8 +23,9 @@ function LoginModal({ open, onClose }) {
             },{withCredentials:true})
             dispatch(setUserData(data))
             onClose()
+            navigate("/dashboard")
         } catch (error) {
-            console.log(error)
+            console.log("Login error:", error.response?.data || error.message)
         }
     }
 

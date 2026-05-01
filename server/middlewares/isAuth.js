@@ -8,10 +8,16 @@ const isAuth = async (req, res, next) => {
       return res.status(400).json({ message: "token not found" });
     }
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(decoded.id);
+    const user = await User.findById(decoded.id);
+    
+    if (!user) {
+      return res.status(401).json({ message: "user not found" });
+    }
+    
+    req.user = user;
     next();
   } catch (error) {
-    return res.status(500).json({ message: "invalid token" });
+    return res.status(401).json({ message: "invalid token" });
   }
 };
 

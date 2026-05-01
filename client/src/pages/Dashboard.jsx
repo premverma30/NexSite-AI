@@ -2,6 +2,7 @@ import { ArrowLeft, Check, Rocket, Share2 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { motion } from "motion/react"
 import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 
 function Dashboard() {
     const { userData } = useSelector(state => state.user)

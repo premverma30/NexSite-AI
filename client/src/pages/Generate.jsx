@@ -3,7 +3,8 @@ import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from "motion/react"
 import { useState } from 'react'
-
+import axios from "axios"
+import { serverUrl } from '../App'
 
 const PHASES = [
     "Analyzing your idea…",
@@ -19,7 +20,52 @@ function Generate() {
     const [progress, setProgress] = useState(0)
     const [phaseIndex, setPhaseIndex] = useState(0)
     const [error,setError]=useState("")
+    const handleGenerateWebsite = async () => {
+        setLoading(true)
+        try {
+            const result = await axios.post(`${serverUrl}/api/website/generate`, { prompt }, { withCredentials: true })
+            console.log(result)
+            setProgress(100)
+            setLoading(false)
+            navigate(`/editor/${result.data.websiteId}`)
+        } catch (error) {
+            setLoading(false)
+            setError(error.response.data.message || "something went wrong")
+            console.log(error)
+        }
+    }
 
+    useEffect(() => {
+        if (!loading) {
+            setPhaseIndex(0)
+            setProgress(0)
+            return
+        }
+
+        let value = 0
+        let phase = 0
+
+        const interval = setInterval(() => {
+            const increment = value < 20
+                ? Math.random() * 1.5
+                : value < 60
+                    ? Math.random() * 1.2
+                    : Math.random() * 0.6;
+            value += increment
+
+            if (value >= 93) value = 93;
+
+            phase = Math.min(
+                Math.floor((value / 100) * PHASES.length), PHASES.length - 1
+            )
+
+            setProgress(Math.floor(value))
+            setPhaseIndex(phase)
+
+        }, 1200)
+
+        return () => clearInterval(interval)
+    }, [loading])
 
     return (
         <div className='min-h-screen bg-linear-to-br from-[#050505] via-[#0b0b0b] to-[#050505] text-white'>
@@ -45,7 +91,7 @@ function Generate() {
                     </h1>
                     <p className='text-zinc-400 max-w-2xl mx-auto'>
                         This process may take several minutes.
-                        genweb.ai focuses on quality, not shortcuts.
+                        NexSite.ai focuses on quality, not shortcuts.
                     </p>
 
                 </motion.div>
