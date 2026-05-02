@@ -1,8 +1,11 @@
 import { ArrowLeft, Check, Rocket, Share2 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { motion } from "motion/react"
-import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { serverUrl } from '../App'
+
 
 function Dashboard() {
     const { userData } = useSelector(state => state.user)
@@ -11,7 +14,47 @@ function Dashboard() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
     const [copiedId, setCopiedId] = useState(null)
-   
+
+    
+    const handleDeploy = async (id) => {
+        try {
+            const result = await axios.get(`${serverUrl}/api/website/deploy/${id}`, { withCredentials: true })
+            window.open(`${result.data.url}`, "_blank")
+            setWebsites((prev) =>
+        prev.map((w) =>
+          w._id === id
+            ? { ...w, deployed: true, deployUrl: result.data.url }
+            : w
+        )
+      );
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    useEffect(() => {
+        const handleGetAllWebsites = async () => {
+            setLoading(true)
+            try {
+
+                const result = await axios.get(`${serverUrl}/api/website/get-all`, { withCredentials: true })
+                setWebsites(result.data || [])
+                setLoading(false)
+            } catch (error) {
+                console.log(error)
+                setError(error.response.data.message)
+                setLoading(false)
+            }
+        }
+        handleGetAllWebsites()
+    }, [])
+
+    const handleCopy = async (site) => {
+        await navigator.clipboard.writeText(site.deployUrl)
+        setCopiedId(site._id)
+        setTimeout(() => setCopiedId(null), 2000)
+    }
+
     return (
         <div className='min-h-screen bg-[#050505] text-white'>
             <div className='sticky top-0 z-40 backdrop-blur-xl bg-black/50 border-b border-white/10'>
@@ -76,7 +119,7 @@ function Dashboard() {
                                     {!w.deployed ? (
                                         <button className=" mt-auto flex items-center justify-center gap-2
                           px-4 py-2 rounded-xl text-sm font-semibold
-                          bg-linear-to-r from-indigo-500 to-purple-500
+                          bg-gradient-to-r from-indigo-500 to-purple-500
                           hover:scale-105 transition
                         "
                                             onClick={() => handleDeploy(w._id)}
