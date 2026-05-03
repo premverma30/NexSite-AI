@@ -1,14 +1,43 @@
 import axios from 'axios'
 import React from 'react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { serverUrl } from '../App'
-import { useState } from 'react'
 import { ArrowLeft, Code, Code2, MessageCircle, MessageSquare, Monitor, Rocket, Send, X } from 'lucide-react'
-import { useRef } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 
 import Editor from '@monaco-editor/react';
+
+// Function to format HTML code
+const formatHtmlCode = (html) => {
+    if (!html) return html
+    try {
+        let formatted = html
+        // Add line breaks before common HTML tags
+        formatted = formatted.replace(/></g, ">\n<")
+        formatted = formatted.replace(/{/g, "{\n")
+        formatted = formatted.replace(/}/g, "\n}")
+        
+        // Basic indentation
+        let indent = 0
+        const lines = formatted.split("\n")
+        const indented = lines.map(line => {
+            const trimmed = line.trim()
+            if (trimmed.startsWith("</") || trimmed.startsWith("}")) {
+                indent = Math.max(0, indent - 1)
+            }
+            const result = "  ".repeat(indent) + trimmed
+            if ((trimmed.startsWith("<") && !trimmed.endsWith("/>") && !trimmed.startsWith("</")) || trimmed.startsWith("{")) {
+                indent++
+            }
+            return result
+        })
+        return indented.join("\n").replace(/\n\n+/g, "\n") // Remove extra blank lines
+    } catch (e) {
+        return html
+    }
+}
+
 function WebsiteEditor() {
     const { id } = useParams()
     const [website, setWebsite] = useState(null)
@@ -16,7 +45,6 @@ function WebsiteEditor() {
     const [code, setCode] = useState("")
     const [messages, setMessages] = useState([])
     const [prompt, setPrompt] = useState("")
-    const iframeRef = useRef(null)
     const [updateLoading, setUpdateLoading] = useState(false)
     const [thinkingIndex, setThinkingIndex] = useState(0)
     const [showCode, setShowCode] = useState(false)
@@ -32,32 +60,36 @@ function WebsiteEditor() {
     ]
     
     const handleUpdate = async () => {
-        if (!prompt) return
-        setUpdateLoading(true)
         const text = prompt
+        if (!text) return
+        setUpdateLoading(true)
         setPrompt("")
-        setMessages((m) => [...m, { role: "user", content: prompt }])
+        setMessages((m) => [...m, { role: "user", content: text }])
         try {
             const result = await axios.post(`${serverUrl}/api/website/update/${id}`, { prompt: text }, { withCredentials: true })
             console.log(result)
             setUpdateLoading(false)
+            setError("") // Clear any previous errors
             setMessages((m) => [...m, { role: "ai", content: result.data.message }])
-            setCode(result.data.code)
+            const formattedCode = formatHtmlCode(result.data.code)
+            setCode(formattedCode)
         } catch (error) {
             setUpdateLoading(false)
             console.log(error)
+            setError(error.response?.data?.message || "Failed to update website")
         }
     }
 
     const handleDeploy = async () => {
-            try {
-                const result = await axios.get(`${serverUrl}/api/website/deploy/${website._id}`, { withCredentials: true })
-                window.open(`${result.data.url}`, "_blank")
-               
-            } catch (error) {
-                console.log(error)
-            }
+        try {
+            const result = await axios.get(`${serverUrl}/api/website/deploy/${website._id}`, { withCredentials: true })
+            window.open(`${result.data.url}`, "_blank")
+            setError("") // Clear any previous errors
+        } catch (error) {
+            console.log(error)
+            setError(error.response?.data?.message || "Failed to deploy website")
         }
+    }
 
 
     useEffect(() => {
@@ -74,24 +106,16 @@ function WebsiteEditor() {
             try {
                 const result = await axios.get(`${serverUrl}/api/website/get-by-id/${id}`, { withCredentials: true })
                 setWebsite(result.data)
-                setCode(result.data.latestCode)
+                const formattedCode = formatHtmlCode(result.data.latestCode)
+                setCode(formattedCode)
                 setMessages(result.data.conversation)
             } catch (error) {
                 console.log(error)
-                setError(error.response.data.message)
+                setError(error.response?.data?.message || "Failed to load website")
             }
         }
         handleGetWebsite()
     }, [id])
-
-
-    useEffect(() => {
-        if (!iframeRef.current || !code) return;
-        const blob = new Blob([code], { type: "text/html" })
-        const url = URL.createObjectURL(blob)
-        iframeRef.current.src = url
-        return () => URL.revokeObjectURL(url)
-    }, [code])
 
     if (error) {
         return (
@@ -173,7 +197,7 @@ function WebsiteEditor() {
 
                 </div>
 
-                <iframe ref={iframeRef} sandbox='allow-scripts allow-same-origin allow-forms' className='flex-1 w-full bg-white' />
+                <iframe className='flex-1 w-full bg-white' srcDoc={code} sandbox='allow-scripts allow-forms' />
             </div>
 
             <AnimatePresence>
@@ -248,6 +272,16 @@ function WebsiteEditor() {
                             value={code}
                             language='html'
                             onChange={(v) => setCode(v)}
+                            options={{
+                                wordWrap: 'on',
+                                minimap: { enabled: false },
+                                fontSize: 13,
+                                lineNumbers: 'on',
+                                formatOnPaste: true,
+                                autoIndent: 'full',
+                                scrollBeyondLastLine: false,
+                                padding: { top: 16, bottom: 16 }
+                            }}
                         />
 
                     </motion.div>
@@ -259,7 +293,7 @@ function WebsiteEditor() {
                     <motion.div
                         className="fixed inset-0 z-[9999] bg-black"
                     >
-                        <iframe className='w-full h-full bg-white' srcDoc={code} sandbox='allow-scripts allow-same-origin allow-forms'/>
+                        <iframe className='w-full h-full bg-white' srcDoc={code} sandbox='allow-scripts allow-forms'/>
                         <button onClick={() => setShowFullPreview(false)} className='absolute top-4 right-4 p-2 bg-black/70 rounded-lg'><X /></button>
                     </motion.div>
                 )}

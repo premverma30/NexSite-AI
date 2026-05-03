@@ -20,6 +20,7 @@ function Generate() {
     const [progress, setProgress] = useState(0)
     const [phaseIndex, setPhaseIndex] = useState(0)
     const [error,setError]=useState("")
+    
     const handleGenerateWebsite = async () => {
         setLoading(true)
         try {

@@ -9,20 +9,34 @@ import userRouter from "./routes/user.routes.js"
 import websiteRouter from "./routes/website.routes.js"
  
 const app = express()
-const port=process.env.PORT || 5000
+const port = process.env.PORT || 5000
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(cors({
     origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
     credentials: true
 }))
 
-app.use("/api/auth",authRouter)
-app.use("/api/user",userRouter)
+app.use("/api/auth", authRouter)
+app.use("/api/user", userRouter)
+app.use("/api/website", websiteRouter)
 
-
-
-app.listen(port,()=>{
-    console.log("🚀 Server started")
-    connectDb()
+app.use((err, req, res, next) => {
+    console.error("Express error:", err)
+    res.status(500).json({ message: "Internal server error" })
 })
+
+const startServer = async () => {
+    try {
+        await connectDb()
+        app.listen(port, () => {
+            console.log(`🚀 Server started on port ${port}`)
+        })
+    } catch (error) {
+        console.error("Failed to start server:", error)
+        process.exit(1)
+    }
+}
+
+startServer()
