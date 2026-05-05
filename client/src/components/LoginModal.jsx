@@ -12,20 +12,20 @@ function LoginModal({ open, onClose }) {
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
-   
-    const handleGoogleAuth=async ()=>{
+    const handleGoogleAuth = async () => {
         try {
-            const result=await signInWithPopup(auth,provider)
-            const {data}=await axios.post(`${serverUrl}/api/auth/google`,{
-                name:result.user.displayName,
-                email:result.user.email,
-                avatar:result.user.photoURL
-            },{withCredentials:true})
+            // signInWithPopup works reliably on localhost (signInWithRedirect does not)
+            const result = await signInWithPopup(auth, provider)
+            const { data } = await axios.post(`${serverUrl}/api/auth/google`, {
+                name: result.user.displayName,
+                email: result.user.email,
+                avatar: result.user.photoURL
+            }, { withCredentials: true })
             dispatch(setUserData(data))
             onClose()
             navigate("/dashboard")
         } catch (error) {
-            console.log("Login error:", error.response?.data || error.message)
+            console.log("Auth error:", error.message)
         }
     }
 
@@ -39,7 +39,6 @@ function LoginModal({ open, onClose }) {
                     exit={{ opacity: 0 }}
                     onClick={onClose}
                 >
-
                     <motion.div
                         initial={{ scale: 0.88, opacity: 0, y: 60 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -49,20 +48,16 @@ function LoginModal({ open, onClose }) {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className='relative rounded-3xl bg-[#0b0b0b] border border-white/10 overflow-hidden'>
-
                             <button
                                 className='absolute top-5 right-5 text-zinc-400 hover:text-white'
                                 onClick={onClose}
                             >
                                 X
                             </button>
-
                             <div className='px-8 pt-14 pb-10 text-center'>
-
                                 <h2 className='text-2xl mb-6'>
                                     Welcome to <span className='text-purple-400'>NexSite.ai</span>
                                 </h2>
-
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
@@ -71,16 +66,9 @@ function LoginModal({ open, onClose }) {
                                 >
                                     Continue with Google
                                 </motion.button>
-
-                                <p className='text-xs text-zinc-500 mt-6'>
-                                    This is a demo login (no backend).
-                                </p>
-
                             </div>
-
                         </div>
                     </motion.div>
-
                 </motion.div>}
         </AnimatePresence>
     )

@@ -1,7 +1,7 @@
 import express from "express"
 
 import isAuth from "../middlewares/isAuth.js"
-import { billing } from "../controllers/billing.controller.js"
+import { billing } from "../controllers/billing.controllers.js"
 
 
 const billingRouter=express.Router()

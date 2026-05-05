@@ -8,26 +8,34 @@ import { useSelector } from 'react-redux'
 import WebsiteEditor from './pages/Editor'
 import LiveSite from './pages/LiveSite'
 import Pricing from './pages/Pricing'
-
-export const serverUrl="http://localhost:8000"
-
-function App() {
-  const {userData}=useSelector(state=>state.user)
+ 
+export const serverUrl = import.meta.env.VITE_API_URL || ""
+ 
+function AppContent() {
+  const { userData } = useSelector(state => state.user)
+ 
+  // Always runs once on mount to restore session from cookie
   useGetCurrentUser()
+ 
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path='/dashboard' element={userData ? <Dashboard /> : <Home />} />
+      <Route path='/generate' element={userData ? <Generate /> : <Home />} />
+      <Route path='/editor/:id' element={userData ? <WebsiteEditor /> : <Home />} />
+      <Route path='/site/:id' element={<LiveSite />} />
+      <Route path='/pricing' element={<Pricing />} />
+    </Routes>
+  )
+}
+ 
+function App() {
   return (
     <BrowserRouter>
-    <Routes>
-      <Route path="/" element={<Home/>}/>
-      <Route path='/dashboard' element={userData?<Dashboard/>:<Home/>}/>
-      <Route path='/generate' element={userData?<Generate/>:<Home/>}/>
-      <Route path='/editor/:id' element={userData?<WebsiteEditor/>:<Home/>}/>
-      <Route path='/site/:id' element={<LiveSite/>}/>
-      <Route path='/pricing' element={<Pricing/>}/>
-        
-
-    </Routes>
+      <AppContent />
     </BrowserRouter>
   )
 }
-
+ 
 export default App
+ 
