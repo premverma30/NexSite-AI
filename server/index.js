@@ -7,7 +7,9 @@ import cookieParser from "cookie-parser"
 import cors from "cors"
 import userRouter from "./routes/user.routes.js"
 import websiteRouter from "./routes/website.routes.js"
- 
+import billingRouter from "./routes/billing.route.js"
+import {stripeWebhook} from "./controllers/stripeWebhook.controller.js"
+
 const app = express()
 const port = process.env.PORT || 5000
 app.use(express.json())
@@ -21,6 +23,7 @@ app.use(cors({
 app.use("/api/auth", authRouter)
 app.use("/api/user", userRouter)
 app.use("/api/website", websiteRouter)
+app.use("/api/billing",billingRouter)
 
 app.use((err, req, res, next) => {
     console.error("Express error:", err)

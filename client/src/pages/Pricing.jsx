@@ -3,13 +3,15 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { useSelector } from "react-redux";
+import axios from "axios";
+import { serverUrl } from "../App";
 
 const plans = [
   {
     key: "free",
     name: "Free",
     price: "₹0",
-    credits: 100,
+    credits: 200,
     description: "Perfect to explore GenWeb.ai",
     features: [
       "AI website generation",
@@ -49,7 +51,28 @@ function Pricing() {
   const navigate = useNavigate();
   const { userData } = useSelector((state) => state.user);
   const [loading, setLoading] = useState(null);
- 
+  const handleBuy = async (planKey) => {
+    if (!userData) {
+      navigate("/");
+      return;
+    }
+    if (planKey == "free") {
+      navigate("/dashboard");
+      return;
+    }
+    setLoading(planKey);
+    try {
+      const result = await axios.post(
+        `${serverUrl}/api/billing`,
+        { planType: planKey },
+        { withCredentials: true },
+      );
+      window.location.href = result.data.sessionUrl;
+    } catch (error) {
+      console.log(error);
+      setLoading(null);
+    }
+  };
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#050505] text-white px-6 pt-16 pb-24">
       <div className="absolute inset-0 pointer-events-none">
@@ -109,7 +132,7 @@ function Pricing() {
 
             <div className="flex items-center gap-2 mb-8">
               <Coins size={18} className="text-yellow-400" />
-              <span className="font-semibold"> Credits</span>
+              <span className="font-semibold">{p.credits} Credits</span>
             </div>
 
             <ul className="space-y-3 mb-10">
@@ -127,6 +150,7 @@ function Pricing() {
             <motion.button
               whileTap={{ scale: 0.96 }}
               disabled={loading}
+              onClick={() => handleBuy(p.key)}
               className={`w-full py-3 rounded-xl font-semibold transition
                               ${
                                 p.popular
@@ -134,7 +158,7 @@ function Pricing() {
                                   : "bg-white/10 hover:bg-white/20"
                               } disabled:opacity-60`}
             >
-              
+              {loading === p.key ? "Redirecting..." : p.button}
             </motion.button>
           </motion.div>
         ))}
