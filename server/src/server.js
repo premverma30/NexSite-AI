@@ -1,6 +1,4 @@
-import dotenv from "dotenv";
-dotenv.config({ path: "../.env" }); // Support if run from src, though usually run from server root
-
+import "./config/loadEnv.js";
 import { validateEnv } from "./config/env.js";
 // Validate env vars before anything else
 validateEnv();

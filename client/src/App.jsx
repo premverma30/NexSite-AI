@@ -11,7 +11,7 @@ import Pricing from "./pages/Pricing";
 
 import { setUserData } from "./redux/userSlice";
 
-export const serverUrl = import.meta.env.VITE_API_URL || "";
+export const serverUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 function AppContent() {
   const { userData } = useSelector((state) => state.user);
@@ -21,15 +21,17 @@ function AppContent() {
   useEffect(() => {
     const getCurrentUser = async () => {
       try {
+        console.log("🔍 [App] Checking session at:", `${serverUrl}/api/auth/me`);
         const res = await axios.get(`${serverUrl}/api/auth/me`, {
           withCredentials: true,
         });
-
+        
+        console.log("✅ [App] Session found:", res.data.user?.email);
         if (res.data.user) {
           dispatch(setUserData(res.data.user));
         }
       } catch (error) {
-        console.log("Not logged in or session expired");
+        console.log("🔒 [App] Not logged in:", error.response?.status === 401 ? "Unauthorized" : error.message);
         dispatch(setUserData(null));
       } finally {
         setLoading(false);

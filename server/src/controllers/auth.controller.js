@@ -3,8 +3,10 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 export const googleAuth = asyncHandler(async (req, res) => {
   const { name, email, avatar } = req.body;
+  console.log("🚀 [googleAuth] Attempting login for:", email);
 
   const { user, token } = await authService.googleLogin(name, email, avatar);
+  console.log("✅ [googleAuth] User authenticated, setting cookie...");
 
   res.cookie("token", token, authService.getCookieOptions());
 

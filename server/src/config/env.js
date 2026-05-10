@@ -7,8 +7,8 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(10, "JWT_SECRET must be at least 10 characters long"),
   OPENROUTER_API_KEY: z.string().min(1, "OPENROUTER_API_KEY is required"),
   FRONTEND_URL: z.string().url("Invalid FRONTEND_URL").default("http://localhost:5173"),
-  STRIPE_SECRET_KEY: z.string().min(1, "STRIPE_SECRET_KEY is required").optional(),
-  STRIPE_WEBHOOK_SECRET: z.string().min(1, "STRIPE_WEBHOOK_SECRET is required").optional()
+  STRIPE_SECRET_KEY: z.string().min(1, "STRIPE_SECRET_KEY is required"),
+  STRIPE_WEBHOOK_SECRET: z.string().optional()
 });
 
 export const validateEnv = () => {

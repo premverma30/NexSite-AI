@@ -1,4 +1,4 @@
-import stripe from "../../config/stripe.js";
+import stripe from "../config/stripe.js";
 import userRepository from "../repositories/user.repository.js";
 import AppError from "../errors/AppError.js";
 import logger from "../utils/logger.js";
