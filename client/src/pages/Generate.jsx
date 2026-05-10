@@ -22,17 +22,35 @@ function Generate() {
     const [error,setError]=useState("")
     
     const handleGenerateWebsite = async () => {
-        setLoading(true)
+        if (!prompt || prompt.trim().length < 10) {
+            setError("Prompt must be at least 10 characters long.");
+            return;
+        }
+
+        setLoading(true);
+        setError("");
+        
         try {
-            const result = await axios.post(`${serverUrl}/api/website/generate`, { prompt }, { withCredentials: true })
-            console.log(result)
-            setProgress(100)
-            setLoading(false)
-            navigate(`/editor/${result.data.websiteId}`)
+            console.log("Sending prompt to backend:", prompt);
+            const result = await axios.post(`${serverUrl}/api/website/generate`, { prompt }, { withCredentials: true });
+            console.log("Response from backend:", result);
+            
+            setProgress(100);
+            setLoading(false);
+            
+            if (result?.data?.data?.websiteId) {
+                navigate(`/editor/${result.data.data.websiteId}`);
+            } else if (result?.data?.websiteId) {
+                navigate(`/editor/${result.data.websiteId}`);
+            } else {
+                throw new Error("Invalid response format from server");
+            }
         } catch (error) {
-            setLoading(false)
-            setError(error.response.data.message || "something went wrong")
-            console.log(error)
+            console.error("Generate error:", error);
+            setLoading(false);
+            
+            const errorMsg = error?.response?.data?.message || error.message || "An unexpected error occurred. Please try again.";
+            setError(errorMsg);
         }
     }
 

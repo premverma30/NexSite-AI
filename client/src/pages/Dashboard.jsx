@@ -19,14 +19,18 @@ function Dashboard() {
     const handleDeploy = async (id) => {
         try {
             const result = await axios.get(`${serverUrl}/api/website/deploy/${id}`, { withCredentials: true })
-            window.open(`${result.data.url}`, "_blank")
-            setWebsites((prev) =>
-        prev.map((w) =>
-          w._id === id
-            ? { ...w, deployed: true, deployUrl: result.data.url }
-            : w
-        )
-      );
+            const data = result?.data?.data || result?.data;
+            
+            if (data?.url) {
+                window.open(`${data.url}`, "_blank")
+                setWebsites((prev) =>
+                    prev.map((w) =>
+                        w._id === id
+                            ? { ...w, deployed: true, deployUrl: data.url }
+                            : w
+                    )
+                );
+            }
         } catch (error) {
             console.log(error)
         }
@@ -36,13 +40,14 @@ function Dashboard() {
         const handleGetAllWebsites = async () => {
             setLoading(true)
             try {
-
                 const result = await axios.get(`${serverUrl}/api/website/get-all`, { withCredentials: true })
-                setWebsites(result.data || [])
+                // The backend returns { success: true, data: [...] }
+                const data = result?.data?.data || result?.data || []
+                setWebsites(Array.isArray(data) ? data : [])
                 setLoading(false)
             } catch (error) {
                 console.log(error)
-                setError(error.response.data.message)
+                setError(error?.response?.data?.message || "Failed to load websites")
                 setLoading(false)
             }
         }

@@ -60,11 +60,15 @@ function AppContent() {
   );
 }
 
+import ErrorBoundary from "./components/ErrorBoundary";
+
 function App() {
   return (
-    <BrowserRouter>
-      <AppContent />
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

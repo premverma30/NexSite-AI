@@ -21,7 +21,7 @@ function LoginModal({ open, onClose }) {
                 email: result.user.email,
                 avatar: result.user.photoURL
             }, { withCredentials: true })
-            dispatch(setUserData(data))
+            dispatch(setUserData(data.user))
             onClose()
             navigate("/dashboard")
         } catch (error) {
