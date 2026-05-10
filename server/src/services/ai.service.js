@@ -248,6 +248,44 @@ RETURN RAW JSON ONLY:
 
     return parsed;
   }
+
+  async auditSeo(currentCode) {
+    const seoPrompt = `
+ANALYZE THIS HTML WEBSITE FOR SEO BEST PRACTICES.
+
+CURRENT CODE:
+${currentCode}
+
+YOU MUST RETURN A JSON OBJECT WITH THE FOLLOWING STRUCTURE:
+{
+  "score": 0-100 (integer),
+  "critical": ["list of major issues missing meta tags, h1, etc."],
+  "warnings": ["list of improvements like alt tags, title length, etc."],
+  "passed": ["list of things done correctly"],
+  "suggestions": ["3-5 actionable tips to rank higher on Google"]
+}
+
+RETURN RAW JSON ONLY.
+`;
+    let raw = "";
+    let parsed = null;
+
+    for (let i = 0; i < 2 && !parsed; i++) {
+      raw = await this.generateResponse(seoPrompt);
+      parsed = await extractJson(raw);
+
+      if (!parsed) {
+        raw = await this.generateResponse(seoPrompt + "\n\nRETURN ONLY RAW JSON.");
+        parsed = await extractJson(raw);
+      }
+    }
+
+    if (!parsed) {
+      throw new AppError("AI returned invalid or empty response structure during SEO audit.", 422);
+    }
+
+    return parsed;
+  }
 }
 
 export default new AiService();

@@ -7,6 +7,7 @@ import ChatPanel from '../features/editor/components/ChatPanel';
 import CodeEditor from '../features/editor/components/CodeEditor';
 import PreviewFrame from '../features/editor/components/PreviewFrame';
 import EditorToolbar from '../features/editor/components/EditorToolbar';
+import SeoAuditSidebar from '../features/editor/components/SeoAuditSidebar';
 
 // Function to format HTML code safely
 const formatHtmlCode = (html) => {
@@ -52,6 +53,9 @@ function WebsiteEditor() {
     const [showCode, setShowCode] = useState(false);
     const [showFullPreview, setShowFullPreview] = useState(false);
     const [showChat, setShowChat] = useState(false);
+    const [showSeo, setShowSeo] = useState(false);
+    const [seoData, setSeoData] = useState(null);
+    const [seoLoading, setSeoLoading] = useState(false);
 
     // 2. Safely extract nested data from backend response contract
     const extractData = (response) => {
@@ -138,6 +142,24 @@ function WebsiteEditor() {
         }
     }, [id]);
 
+    const handleSeoAudit = useCallback(async () => {
+        setShowSeo(true);
+        if (seoData) return; // Don't re-audit if we already have data (unless code changed, but keep it simple for now)
+        
+        setSeoLoading(true);
+        try {
+            const result = await axios.get(`${serverUrl}/api/website/audit-seo/${id}`, { withCredentials: true });
+            const data = extractData(result);
+            setSeoData(data);
+        } catch (error) {
+            console.error("SEO Audit Error:", error);
+            setError("Failed to run SEO audit. Please try again.");
+            setShowSeo(false);
+        } finally {
+            setSeoLoading(false);
+        }
+    }, [id, seoData]);
+
     const handleCodeChange = useCallback((v) => {
         setCode(v);
     }, []);
@@ -189,6 +211,7 @@ function WebsiteEditor() {
                   onToggleChat={() => setShowChat(true)}
                   onToggleCode={() => setShowCode(true)}
                   onTogglePreview={() => setShowFullPreview(true)}
+                  onToggleSeo={handleSeoAudit}
                 />
 
                 <PreviewFrame 
@@ -217,6 +240,13 @@ function WebsiteEditor() {
               showCode={showCode}
               onClose={() => setShowCode(false)}
               onCodeChange={handleCodeChange}
+            />
+
+            <SeoAuditSidebar 
+              isOpen={showSeo}
+              onClose={() => setShowSeo(false)}
+              auditData={seoData}
+              loading={seoLoading}
             />
             
             {/* Floating Error Toast */}

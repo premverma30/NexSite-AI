@@ -1,7 +1,8 @@
 import React from 'react';
-import { Code2, MessageSquare, Monitor, Rocket } from 'lucide-react';
+import { Code2, MessageSquare, Monitor, Rocket, Download, Search } from 'lucide-react';
+import { exportToZip } from '../../../utils/exportUtils';
 
-function EditorToolbar({ website, onDeploy, onToggleChat, onToggleCode, onTogglePreview }) {
+function EditorToolbar({ website, onDeploy, onToggleChat, onToggleCode, onTogglePreview, onToggleSeo }) {
   if (!website) return null;
 
   return (
@@ -27,6 +28,23 @@ function EditorToolbar({ website, onDeploy, onToggleChat, onToggleCode, onToggle
         
         <button className='p-2' onClick={onTogglePreview}>
           <Monitor size={18} />
+        </button>
+
+        <button 
+          className='p-2 text-zinc-400 hover:text-white transition-colors' 
+          onClick={() => exportToZip(website.title, website.latestCode)}
+          title="Download Source (ZIP)"
+        >
+          <Download size={18} />
+        </button>
+
+        <button 
+          className='p-2 text-zinc-400 hover:text-white transition-colors flex items-center gap-2' 
+          onClick={onToggleSeo}
+          title="AI SEO Audit"
+        >
+          <Search size={18} />
+          <span className='hidden sm:inline text-[10px] font-bold uppercase tracking-widest'>SEO</span>
         </button>
       </div>
     </div>

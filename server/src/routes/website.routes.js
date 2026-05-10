@@ -5,7 +5,8 @@ import {
   deploy, 
   changes, 
   getWebsiteById, 
-  getBySlug 
+  getBySlug,
+  auditSeo 
 } from "../controllers/website.controllers.js";
 import isAuth from "../middlewares/isAuth.js";
 import { validateRequest } from "../middlewares/validate.middleware.js";
@@ -24,5 +25,6 @@ router.get("/get-all", getAll);
 router.get("/deploy/:id", deploy);
 router.post("/update/:id", aiLimiter, validateRequest(updateWebsiteSchema), changes);
 router.get("/get-by-id/:id", getWebsiteById);
+router.get("/audit-seo/:id", aiLimiter, auditSeo);
 
 export default router;

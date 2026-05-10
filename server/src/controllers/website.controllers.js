@@ -88,3 +88,12 @@ export const getBySlug = asyncHandler(async (req, res) => {
     return res.status(500).json({ success: false, message: error.message || "Server error" });
   }
 });
+
+export const auditSeo = asyncHandler(async (req, res) => {
+  const result = await websiteService.auditSeo(req.params.id, req.user._id);
+
+  res.status(200).json({
+    success: true,
+    data: result,
+  });
+});

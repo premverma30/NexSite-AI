@@ -118,6 +118,13 @@ class WebsiteService {
     if (!website) throw new AppError("Website not found", 404);
     return website;
   }
+
+  async auditSeo(websiteId, userId) {
+    const website = await websiteRepository.findByIdAndUser(websiteId, userId);
+    if (!website) throw new AppError("Website not found or unauthorized", 404);
+
+    return aiService.auditSeo(website.latestCode);
+  }
 }
 
 export default new WebsiteService();

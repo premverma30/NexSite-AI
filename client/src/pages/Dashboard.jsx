@@ -1,10 +1,11 @@
-import { ArrowLeft, Check, Rocket, Share2 } from 'lucide-react'
+import { ArrowLeft, Check, Rocket, Share2, Download } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { motion } from "motion/react"
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { serverUrl } from '../App'
+import { exportToZip } from '../utils/exportUtils'
 
 
 function Dashboard() {
@@ -14,6 +15,7 @@ function Dashboard() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
     const [copiedId, setCopiedId] = useState(null)
+    const [downloadingId, setDownloadingId] = useState(null)
 
     
     const handleDeploy = async (id) => {
@@ -58,6 +60,17 @@ function Dashboard() {
         await navigator.clipboard.writeText(site.deployUrl)
         setCopiedId(site._id)
         setTimeout(() => setCopiedId(null), 2000)
+    }
+
+    const handleDownload = async (site) => {
+        setDownloadingId(site._id);
+        try {
+            await exportToZip(site.title, site.latestCode);
+        } catch (error) {
+            console.error("Download error:", error);
+        } finally {
+            setDownloadingId(null);
+        }
     }
 
     return (
@@ -155,6 +168,19 @@ function Dashboard() {
                                         </>
                                         }
                                     </motion.button>)}
+
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDownload(w);
+                                        }}
+                                        disabled={downloadingId === w._id}
+                                        className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-white/5 hover:bg-white/10 border border-white/10 transition-all disabled:opacity-50"
+                                        title="Download Source Code (ZIP)"
+                                    >
+                                        <Download size={14} className={downloadingId === w._id ? "animate-bounce" : ""} />
+                                        {downloadingId === w._id ? "Preparing..." : "Source Code"}
+                                    </button>
 
                                 </div>
 
