@@ -11,7 +11,7 @@ import Pricing from "./pages/Pricing";
 
 import { setUserData } from "./redux/userSlice";
 
-export const serverUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+export const serverUrl ="https://nexsite-ai.onrender.com";
 
 function AppContent() {
   const { userData } = useSelector((state) => state.user);
